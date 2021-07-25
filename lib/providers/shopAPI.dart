@@ -1,12 +1,11 @@
 import 'dart:convert';
 import 'package:find_place/model/Detail.dart';
-import 'package:flutter/material.dart';
 import 'package:find_place/model/shop.dart';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 
-class ShopProvider extends ChangeNotifier {
-  getShops() async {
+class ShopAPI {
+  static Future<List<Shop>> getShop(String? query) async {
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
 
@@ -14,19 +13,22 @@ class ShopProvider extends ChangeNotifier {
     var lng = position.longitude;
 
     var url = Uri.parse(
-        'http://localhost:8080/places?lat=${lat}&lng=${lng}&category=coffee');
+        'http://api.murayyan.dev/places?lat=$lat&lng=$lng&keyword=$query&category=coffee');
     print(url);
     var result = await http.get(url);
     if (result.statusCode == 200) {
       Map<String, dynamic> response = jsonDecode(result.body);
       List data = response["data"];
+      if (data.isEmpty) {
+        return <Shop>[Shop(null, null, null, null, null, null, null)];
+      }
       List<Shop> shops = data.map((item) => Shop.fromJson(item)).toList();
       return shops;
     }
     return <Shop>[];
   }
 
-  getDetailShop(String? placeId) async {
+  static Future<Object> getDetailShop(String? placeId) async {
     var url = Uri.parse(
         'https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=AIzaSyDyZtVVw7ZuBWeZiXLaPhKaYueL7HGMkvU&language=id');
     var result = await http.get(url);

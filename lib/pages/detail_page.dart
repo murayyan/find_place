@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:find_place/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:find_place/providers/shop_provider.dart';
+import 'package:find_place/providers/shopAPI.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class DetailPage extends StatelessWidget {
@@ -16,8 +16,6 @@ class DetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var shopProvider = Provider.of<ShopProvider>(context);
-
     launchUrl(String url) async {
       if (await canLaunch(url)) {
         launch(url);
@@ -36,7 +34,7 @@ class DetailPage extends StatelessWidget {
       body: SafeArea(
         bottom: false,
         child: FutureBuilder(
-          future: shopProvider.getDetailShop(placeId),
+          future: ShopAPI.getDetailShop(placeId),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               Detail detail = snapshot.data as Detail;

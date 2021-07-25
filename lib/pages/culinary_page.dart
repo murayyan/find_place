@@ -1,4 +1,4 @@
-import 'package:find_place/providers/shop_provider.dart';
+import 'package:find_place/providers/shopAPI.dart';
 import 'package:find_place/theme.dart';
 import 'package:find_place/widgets/shop_card.dart';
 import 'package:flutter/material.dart';
@@ -8,8 +8,6 @@ import 'package:provider/provider.dart';
 class CulinaryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var shopProvider = Provider.of<ShopProvider>(context);
-
     return Scaffold(
       backgroundColor: whiteColor,
       body: SafeArea(
@@ -114,7 +112,7 @@ class CulinaryPage extends StatelessWidget {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: edge),
               child: FutureBuilder(
-                future: shopProvider.getShops(),
+                future: ShopAPI.getShop(''),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     List<Shop> data = snapshot.data as List<Shop>;

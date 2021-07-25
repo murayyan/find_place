@@ -1,15 +1,102 @@
-import 'package:find_place/providers/shop_provider.dart';
+import 'dart:async';
+
+import 'package:find_place/providers/shopAPI.dart';
 import 'package:find_place/theme.dart';
+import 'package:find_place/widgets/search_widget.dart';
 import 'package:find_place/widgets/shop_card.dart';
 import 'package:flutter/material.dart';
 import 'package:find_place/model/shop.dart';
-import 'package:provider/provider.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => new _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  List<Shop> shops = [];
+  String query = '';
+  Timer? debouncer;
+
+  @override
+  void initState() {
+    super.initState();
+
+    init();
+  }
+
+  @override
+  void dispose() {
+    debouncer?.cancel();
+    super.dispose();
+  }
+
+  void debounce(
+    VoidCallback callback, {
+    Duration duration = const Duration(milliseconds: 1000),
+  }) {
+    if (debouncer != null) {
+      debouncer!.cancel();
+    }
+
+    debouncer = Timer(duration, callback);
+  }
+
+  Future init() async {
+    final shops = await ShopAPI.getShop('');
+    print(shops);
+
+    setState(() => this.shops = shops);
+  }
+
+  Future search(String query) async => debounce(() async {
+        final shops = await ShopAPI.getShop(query);
+
+        if (!mounted) return;
+
+        setState(() {
+          this.query = query;
+          this.shops = shops;
+        });
+      });
+
+  Widget getWidget() {
+    if (shops.isNotEmpty) {
+      if (shops[0].name == null) {
+        return Container(
+          height: 100,
+          child: Center(
+            child: Text(
+              'Not Found',
+              textAlign: TextAlign.center,
+              style: greyTextStyle.copyWith(
+                fontSize: 16,
+              ),
+            ),
+          ),
+        );
+      }
+      List<Shop> data = shops;
+
+      int index = 0;
+      return Column(
+        children: data.map((item) {
+          index++;
+          return Container(
+            margin: EdgeInsets.only(
+              top: index == 1 ? 0 : 30,
+            ),
+            child: ShopCard(item),
+          );
+        }).toList(),
+      );
+    }
+    return Center(
+      child: CircularProgressIndicator(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    var shopProvider = Provider.of<ShopProvider>(context);
-
     return Scaffold(
       backgroundColor: whiteColor,
       body: SafeArea(
@@ -98,33 +185,10 @@ class HomePage extends StatelessWidget {
             SizedBox(
               height: 20,
             ),
-            Container(
-              height: 55,
-              width: double.infinity,
-              margin: EdgeInsets.only(
-                left: edge,
-                right: edge,
-              ),
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: searchBarColor,
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      decoration: InputDecoration.collapsed(
-                        hintText: 'Search Coffee Shop...',
-                        hintStyle: greyTextStyle,
-                      ),
-                    ),
-                  ),
-                  Icon(
-                    Icons.search,
-                  ),
-                ],
-              ),
+            SearchWidget(
+              text: query,
+              hintText: 'Place Name',
+              onChanged: search,
             ),
             SizedBox(
               height: 20,
@@ -143,32 +207,8 @@ class HomePage extends StatelessWidget {
               height: 16,
             ),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: edge),
-              child: FutureBuilder(
-                future: shopProvider.getShops(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    List<Shop> data = snapshot.data as List<Shop>;
-
-                    int index = 0;
-                    return Column(
-                      children: data.map((item) {
-                        index++;
-                        return Container(
-                          margin: EdgeInsets.only(
-                            top: index == 1 ? 0 : 30,
-                          ),
-                          child: ShopCard(item),
-                        );
-                      }).toList(),
-                    );
-                  }
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                },
-              ),
-            ),
+                padding: EdgeInsets.symmetric(horizontal: edge),
+                child: getWidget()),
             SizedBox(
               height: 50 + edge,
             ),
