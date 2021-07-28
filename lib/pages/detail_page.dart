@@ -42,8 +42,9 @@ class DetailPage extends StatelessWidget {
               return Stack(
                 children: [
                   Image.network(
-                    detail.photo?[0].photoReference ??
-                        'https://bodybigsize.b-cdn.net/wp-content/uploads/2020/02/noimage-11.png',
+                    detail.photo!.length > 0
+                        ? detail.photo![0].photoReference!
+                        : 'https://bodybigsize.b-cdn.net/wp-content/uploads/2020/02/noimage-11.png',
                     width: MediaQuery.of(context).size.width,
                     height: 500,
                     fit: BoxFit.cover,
@@ -101,7 +102,10 @@ class DetailPage extends StatelessWidget {
                                               width: 5,
                                             ),
                                             RatingBar.builder(
-                                              initialRating: detail.rating!,
+                                              initialRating:
+                                                  detail.rating != null
+                                                      ? detail.rating!
+                                                      : 0,
                                               minRating: 1,
                                               direction: Axis.horizontal,
                                               allowHalfRating: true,
@@ -149,7 +153,9 @@ class DetailPage extends StatelessWidget {
                                 children: [
                                   Flexible(
                                     child: Text(
-                                      detail.address!,
+                                      detail.address != null
+                                          ? detail.address!
+                                          : '',
                                       style: greyTextStyle,
                                     ),
                                   ),

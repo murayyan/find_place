@@ -21,8 +21,11 @@ class Detail {
   }
 
   Detail.fromJson(json) {
-    var listPhoto = json['photos'] as List;
-    List<Photo> photos = listPhoto.map((i) => Photo.fromJson(i)).toList();
+    List<Photo> photos = [];
+    if (json['photos'] != null) {
+      var listPhoto = json['photos'] as List;
+      photos = listPhoto.map((i) => Photo.fromJson(i)).toList();
+    }
 
     List<String>? hours;
     if (json['opening_hours'] != null) {
@@ -30,9 +33,11 @@ class Detail {
       hours = open.openingHours;
     }
 
-    var listReview = json['reviews'] as List;
-    List<Review> listReviews =
-        listReview.map((i) => Review.fromJson(i)).toList();
+    List<Review> listReviews = [];
+    if (json['reviews'] != null) {
+      var listReview = json['reviews'] as List;
+      listReviews = listReview.map((i) => Review.fromJson(i)).toList();
+    }
 
     placeId = json['place_id'];
     name = json['name'];

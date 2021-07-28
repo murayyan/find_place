@@ -14,6 +14,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<Shop> shops = [];
+  List<Shop> initShops = [];
+  List<Shop> searchShops = [];
   String query = '';
   Timer? debouncer;
 
@@ -42,20 +44,20 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future init() async {
-    final shops = await ShopAPI.getShop('');
+    initShops = await ShopAPI.getShop('');
     print(shops);
 
-    setState(() => this.shops = shops);
+    setState(() => this.shops = initShops);
   }
 
   Future search(String query) async => debounce(() async {
-        final shops = await ShopAPI.getShop(query);
+        if (query != '') searchShops = await ShopAPI.search(query);
 
         if (!mounted) return;
 
         setState(() {
           this.query = query;
-          this.shops = shops;
+          this.shops = query == '' ? initShops : searchShops;
         });
       });
 
